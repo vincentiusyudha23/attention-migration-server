@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SERVER RELOKASI — URL BARU</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green-dark:   #080f08;
+      --green-base:   #162916;
+      --green-mid:    #2a4f2a;
+      --green-light:  #4a8c4a;
+      --green-bright: #5ebd5e;
+      --green-glow:   #7fff7f;
+      --tan:          #c8b568;
+      --tan-dark:     #8a7a40;
+      --amber:        #ffaa00;
+      --white:        #e8f0e8;
+      --blue-accent:  #00c8ff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--green-dark);
+      background-image:
+        repeating-linear-gradient(0deg,   transparent, transparent 3px, rgba(0,80,0,.06) 3px, rgba(0,80,0,.06) 4px),
+        repeating-linear-gradient(90deg,  transparent, transparent 3px, rgba(0,80,0,.06) 3px, rgba(0,80,0,.06) 4px);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--green-bright);
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Noise */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999; opacity: .5;
+    }
+
+    /* Scan sweep */
+    body::after {
+      content: '';
+      position: fixed; top: -40%; left: 0; width: 100%; height: 35%;
+      background: linear-gradient(to bottom, transparent, rgba(94,189,94,.03), transparent);
+      animation: scan 7s linear infinite;
+      pointer-events: none; z-index: 998;
+    }
+    @keyframes scan { to { top: 110%; } }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 42px;
+      background: var(--green-base);
+      border-bottom: 2px solid var(--green-mid);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; z-index: 100;
+    }
+    .top-bar .brand {
+      font-family: 'Oswald', sans-serif; font-size: 13px;
+      letter-spacing: 5px; color: var(--tan); text-transform: uppercase;
+    }
+    .top-bar .badges {
+      display: flex; gap: 10px; align-items: center;
+    }
+    .badge-pill {
+      font-size: 9px; letter-spacing: 3px; padding: 2px 8px;
+      border: 1px solid var(--green-mid); color: var(--green-bright);
+      text-transform: uppercase;
+    }
+    .badge-pill.active { border-color: var(--amber); color: var(--amber); }
+    .top-bar .datetime { font-size: 11px; letter-spacing: 2px; color: var(--green-light); opacity: .8; }
+
+    /* ── FRAME ── */
+    .frame {
+      position: relative;
+      width: min(700px, 93vw);
+      border: 2px solid var(--green-light);
+      padding: 44px 48px 36px;
+      background: linear-gradient(160deg, rgba(22,41,22,.97) 0%, rgba(8,15,8,.99) 100%);
+      box-shadow:
+        0 0 0 1px rgba(94,189,94,.12),
+        0 0 60px rgba(94,189,94,.05),
+        inset 0 0 80px rgba(0,0,0,.5);
+    }
+    .frame::before, .frame::after,
+    .frame .cbr, .frame .cbl {
+      content: ''; position: absolute;
+      width: 20px; height: 20px;
+      border-color: var(--tan); border-style: solid;
+    }
+    .frame::before  { top:-2px;    left:-2px;  border-width: 3px 0 0 3px; }
+    .frame::after   { top:-2px;    right:-2px; border-width: 3px 3px 0 0; }
+    .frame .cbr     { bottom:-2px; right:-2px; border-width: 0 3px 3px 0; }
+    .frame .cbl     { bottom:-2px; left:-2px;  border-width: 0 0 3px 3px; }
+
+    /* ── EMBLEM ── */
+    .emblem {
+      text-align: center; margin-bottom: 20px;
+    }
+    .emblem svg {
+      width: 68px; height: 68px;
+      filter: drop-shadow(0 0 14px rgba(94,189,94,.55));
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%,100% { filter: drop-shadow(0 0 10px rgba(94,189,94,.4)); }
+      50%      { filter: drop-shadow(0 0 24px rgba(94,189,94,.85)); }
+    }
+    .emblem .sub {
+      font-family: 'Oswald', sans-serif; font-size: 10px;
+      letter-spacing: 7px; color: var(--tan); margin-top: 6px;
+    }
+
+    /* ── TITLE ── */
+    .title {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(30px, 6.5vw, 52px);
+      font-weight: 700; letter-spacing: 6px; text-transform: uppercase;
+      color: var(--green-glow); text-align: center; line-height: 1;
+      text-shadow: 0 0 28px rgba(127,255,127,.4);
+      animation: flicker 9s infinite;
+    }
+    @keyframes flicker {
+      0%,95%,100%  { opacity:1; }
+      96%           { opacity:.6; }
+      97%           { opacity:1; }
+      98.5%         { opacity:.35; }
+      99%           { opacity:1; }
+    }
+    .subtitle {
+      font-family: 'Rajdhani', sans-serif; font-size: 12px;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: var(--tan); text-align: center;
+      margin-top: 6px; margin-bottom: 28px;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex; align-items: center; gap: 10px; margin: 18px 0;
+    }
+    .divider::before, .divider::after {
+      content:''; flex:1; height:1px;
+      background: linear-gradient(to right, transparent, var(--green-mid));
+    }
+    .divider::after { background: linear-gradient(to left, transparent, var(--green-mid)); }
+    .divider span { color: var(--green-light); font-size: 16px; }
+
+    /* ── MIGRATION CARD ── */
+    .migration-card {
+      border: 1px solid var(--green-mid);
+      background: rgba(0,0,0,.35);
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .migration-card .label {
+      position: absolute; top: -9px; left: 16px;
+      background: var(--green-dark); padding: 0 8px;
+      font-size: 9px; letter-spacing: 4px;
+      color: var(--tan-dark); text-transform: uppercase;
+    }
+
+    /* ── ARROW LAYOUT ── */
+    .relay-wrap {
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .server-block {
+      flex: 1; min-width: 130px;
+      border: 1px solid var(--green-mid);
+      padding: 14px 16px; text-align: center;
+      position: relative;
+    }
+    .server-block.old {
+      border-color: var(--tan-dark);
+      background: rgba(139,122,64,.06);
+      opacity: .6;
+    }
+    .server-block.new-s {
+      border-color: var(--green-bright);
+      background: rgba(94,189,94,.05);
+      box-shadow: 0 0 14px rgba(94,189,94,.1);
+    }
+    .server-block .sb-label {
+      font-size: 9px; letter-spacing: 4px;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .server-block.old .sb-label { color: var(--tan-dark); }
+    .server-block.new-s .sb-label { color: var(--green-bright); }
+    .server-block .sb-val {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700; font-size: 13px;
+      word-break: break-all;
+    }
+    .server-block.old .sb-val { color: rgba(200,181,104,.5); }
+    .server-block.new-s .sb-val { color: var(--green-glow); }
+    .server-block .sb-tag {
+      font-size: 9px; margin-top: 5px;
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    .server-block.old .sb-tag { color: var(--tan-dark); }
+    .server-block.new-s .sb-tag { color: var(--green-bright); }
+
+    .arrow-col {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 4px; flex-shrink: 0;
+    }
+    .arrow-col .arrow-icon {
+      font-size: 26px; color: var(--amber);
+      animation: arrow-pulse 1.4s ease-in-out infinite;
+      line-height: 1;
+    }
+    @keyframes arrow-pulse {
+      0%,100% { opacity:.4; transform: translateX(0); }
+      50%      { opacity:1;  transform: translateX(4px); }
+    }
+    .arrow-col .arrow-text {
+      font-size: 8px; letter-spacing: 2px; color: var(--amber); opacity: .7;
+    }
+
+    /* ── CTA URL BOX ── */
+    .url-box {
+      border: 1px solid var(--green-bright);
+      background: rgba(94,189,94,.04);
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      position: relative;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(94,189,94,.06);
+    }
+    .url-box .label {
+      position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+      background: var(--green-dark); padding: 0 12px;
+      font-size: 9px; letter-spacing: 4px;
+      color: var(--green-bright); text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .url-box .new-url {
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      font-size: clamp(16px, 4vw, 22px); letter-spacing: 2px;
+      color: var(--green-glow);
+      text-shadow: 0 0 16px rgba(127,255,127,.5);
+      word-break: break-all;
+    }
+    .url-box a.new-url {
+      text-decoration: none;
+      transition: text-shadow .2s;
+    }
+    .url-box a.new-url:hover {
+      text-shadow: 0 0 28px rgba(127,255,127,.9);
+    }
+    .url-box .redirect-note {
+      font-size: 11px; letter-spacing: 2px;
+      color: var(--amber); margin-top: 8px;
+    }
+
+    /* ── STATUS ROWS ── */
+    .info-box {
+      border: 1px solid var(--green-mid); background: rgba(0,0,0,.25);
+      padding: 14px 20px; margin-bottom: 20px; position: relative;
+    }
+    .info-box .label {
+      position: absolute; top: -9px; left: 16px;
+      background: var(--green-dark); padding: 0 8px;
+      font-size: 9px; letter-spacing: 4px; color: var(--tan-dark); text-transform: uppercase;
+    }
+    .info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-bottom: 1px solid rgba(74,140,74,.12);
+      font-size: 11px; letter-spacing: 1px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .k { color: var(--green-light); opacity:.8; }
+    .info-row .v { color: var(--amber); }
+    .info-row .v.ok  { color: var(--green-bright); }
+
+    /* ── MSG ── */
+    .message {
+      font-size: 12px; line-height: 1.9;
+      color: rgba(232,240,232,.55); text-align: center;
+      letter-spacing: 1px; margin-bottom: 28px;
+    }
+    .message strong { color: var(--tan); }
+
+    /* ── BTN ── */
+    .btn-wrap { text-align: center; }
+    .btn {
+      display: inline-block;
+      font-family: 'Oswald', sans-serif; font-size: 14px;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: var(--green-dark);
+      background: var(--green-bright);
+      border: 2px solid var(--green-glow);
+      padding: 12px 36px;
+      text-decoration: none;
+      cursor: pointer;
+      position: relative;
+      transition: background .2s, box-shadow .2s;
+      box-shadow: 0 0 18px rgba(94,189,94,.25);
+    }
+    .btn:hover {
+      background: var(--green-glow);
+      box-shadow: 0 0 32px rgba(127,255,127,.5);
+    }
+    .btn::before, .btn::after {
+      content:''; position:absolute;
+      width:8px; height:8px; border-color:var(--tan); border-style:solid;
+    }
+    .btn::before { top:-2px; left:-2px; border-width:2px 0 0 2px; }
+    .btn::after  { bottom:-2px; right:-2px; border-width:0 2px 2px 0; }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 28px; font-size: 9px; letter-spacing: 3px;
+      color: rgba(74,140,74,.4); text-align: center; text-transform: uppercase;
+    }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-bar {
+      position: fixed; bottom:0; left:0; right:0; height:34px;
+      background: var(--green-base); border-top:1px solid var(--green-mid);
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 0 24px; font-size:9px; letter-spacing:3px; color:var(--green-mid); z-index:100;
+    }
+    .ticker { overflow:hidden; flex:1; text-align:center; }
+    .ticker span {
+      display:inline-block; white-space:nowrap;
+      animation: ticker 28s linear infinite;
+    }
+    @keyframes ticker { 0% { transform:translateX(100vw); } 100% { transform:translateX(-100%); } }
+
+    @media (max-width: 480px) {
+      .frame { padding: 32px 22px 28px; }
+      .relay-wrap { flex-direction: column; }
+      .arrow-col .arrow-icon { transform: rotate(90deg); }
+      @keyframes arrow-pulse {
+        0%,100% { opacity:.4; transform:rotate(90deg) translateX(0); }
+        50%      { opacity:1;  transform:rotate(90deg) translateX(4px); }
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="brand">&#9650; PUSPALAD</div>
+    <div class="badges">
+      <div class="badge-pill active">RELOKASI</div>
+      <div class="badge-pill">Si AMPuh</div>
+    </div>
+    <div class="datetime" id="datetime">--:--:-- / --/--/----</div>
+  </div>
+
+  <!-- MAIN FRAME -->
+  <div class="frame">
+    <div class="cbr"></div>
+    <div class="cbl"></div>
+
+    <!-- Emblem -->
+    <div class="emblem">
+      <img src="logo-1.png" width="150" height="auto">
+      <div class="sub">◆ RELOKASI SERVER ◆</div>
+    </div>
+
+    <!-- Title -->
+    <div class="title">SERVER MIGRATION</div>
+    <div class="subtitle">// Si AMPuh TELAH BERPINDAH LOKASI //</div>
+
+    <div class="divider"><span>⬡</span></div>
+
+    <!-- Migration diagram -->
+    <div class="migration-card">
+      <div class="label">// Rute Relokasi Jaringan</div>
+      <div class="relay-wrap">
+        <div class="server-block old">
+          <div class="sb-label">SERVER LAMA</div>
+          <div class="sb-val">https://siampuh.com</div>
+          <div class="sb-tag">✕ TIDAK AKTIF</div>
+        </div>
+        <div class="arrow-col">
+          <div class="arrow-icon">⟹</div>
+          <div class="arrow-text">RELOKASI</div>
+        </div>
+        <div class="server-block new-s">
+          <div class="sb-label">SERVER BARU</div>
+          <div class="sb-val">http://103.83.94.178</div>
+          <div class="sb-tag">● AKTIF &amp; ONLINE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New URL CTA -->
+    <div class="url-box">
+      <div class="label">// URL Resmi Baru — Akses Sekarang</div>
+      <a class="new-url" href="https://www.domain-baru.com" target="_blank">
+        http://103.83.94.178
+      </a>
+      <div class="redirect-note">⚠ Simpan dan perbarui bookmark Anda segera</div>
+    </div>
+
+    <!-- Info rows -->
+    <div class="info-box">
+      <div class="label">// Laporan Migrasi</div>
+      <div class="info-row">
+        <span class="k">STATUS MIGRASI</span>
+        <span class="v ok">● SELESAI 100%</span>
+      </div>
+      <div class="info-row">
+        <span class="k">SERVER BARU</span>
+        <span class="v ok">● ONLINE &amp; STABIL</span>
+      </div>
+      <div class="info-row">
+        <span class="k">DATA &amp; KONTEN</span>
+        <span class="v ok">● DIPINDAHKAN PENUH</span>
+      </div>
+      <div class="info-row">
+        <span class="k">URL LAMA</span>
+        <span class="v">● TIDAK BERLAKU LAGI</span>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div class="message">
+      <strong>[ PEMBERITAHUAN RESMI ]</strong><br/>
+      Layanan kami telah resmi berpindah ke server dan URL yang baru.<br/>
+      Harap perbarui bookmark dan informasikan kepada seluruh personel.<br/>
+      <strong>URL lama tidak lagi dapat diakses mulai hari ini.</strong>
+    </div>
+
+    <!-- CTA Button -->
+    <div class="btn-wrap">
+      <a class="btn" href="http://103.83.94.178" target="_blank">
+        ▶ &nbsp;MENUJU URL BARU
+      </a>
+    </div>
+
+    <div class="footer">
+      AUTHORIZED PERSONNEL ONLY &nbsp;|&nbsp; NETWORK OPS CENTER &nbsp;|&nbsp; TS/SCI
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <span>NET-OPS</span>
+    <div class="ticker">
+      <span>
+        ◆ SERVER TELAH BERHASIL DIPINDAHKAN — GUNAKAN URL BARU UNTUK AKSES &nbsp;&nbsp;&nbsp;
+        ◆ URL LAMA SUDAH TIDAK AKTIF — PERBARUI BOOKMARK ANDA SEKARANG &nbsp;&nbsp;&nbsp;
+        ◆ SEMUA DATA DAN LAYANAN TELAH BERHASIL DIMIGRASIKAN &nbsp;&nbsp;&nbsp;
+        ◆ HUBUNGI ADMIN JIKA MENGALAMI KENDALA AKSES &nbsp;&nbsp;&nbsp;
+      </span>
+    </div>
+    <span>SIG-INT</span>
+  </div>
+
+  <script>
+    // Live clock
+    function tick() {
+      const now = new Date();
+      const t = now.toTimeString().slice(0,8);
+      const d = now.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
+      document.getElementById('datetime').textContent = t + ' / ' + d;
+    }
+    tick(); setInterval(tick, 1000);
+  </script>
+</body>
+</html>
